@@ -1,0 +1,8 @@
+.vscode
+*.pdf
+Makefile
+test
+*.o
+*.out
+*.a
+lst
