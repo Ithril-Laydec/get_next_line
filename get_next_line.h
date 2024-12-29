@@ -6,7 +6,7 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:44 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/28 19:34:14 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/29 17:54:45 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <stdio.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 87
+#  define BUFFER_SIZE 2
 # endif
 # ifndef MAX_FD
 #  define MAX_FD 19999
@@ -33,24 +33,16 @@ typedef struct	s_fd_list
 
 typedef struct	s_warehouse
 {
-	t_fd_list		*fd_list;
-	char			buffer[BUFFER_SIZE + 1];
 	int				i;
 	char			*nl;
-	t_fd_list		*current;
 }				t_warehouse;
 
-char		*get_next_line(int fd);
-char		*ft_strndup(const char *s, int n);
-char		*ft_strnjoin(t_warehouse *wh);
-t_fd_list	*search_fd(t_warehouse *wh, int fd);
-size_t		ft_strlen(const char *str);
-// void		*ft_realloc(void *ptr, size_t size);
-t_fd_list	*ft_lstnew(int fd);
-void		ft_lstadd_front(t_fd_list **lst, t_fd_list *new);
-void		ft_lstadd_back(t_fd_list **lst, t_fd_list *new);
-
-
+char	*get_next_line(int fd);
+size_t	ft_strlen(const char *str);
+int		forward_i(char buffer[MAX_FD][BUFFER_SIZE], int fd, int bytes_read);
+char	*create_new_line(char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
+char	*join_new_line(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
+int		check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
 
 
 # endif

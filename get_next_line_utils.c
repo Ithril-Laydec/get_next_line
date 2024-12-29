@@ -6,80 +6,110 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:19 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/28 19:13:57 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/29 17:54:08 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-void	ft_lstadd_front(t_fd_list **lst, t_fd_list *new)
+size_t	ft_strlen(const char *str)
 {
-	if (lst && new)
+	size_t	len;
+
+	len = 0;
+	while (*str)
 	{
-		new->next = *lst;
-		*lst = new;
+		str++;
+		len++;
 	}
+	return (len);
 }
 
-void	ft_lstadd_back(t_fd_list **lst, t_fd_list *new)
+int	forward_i(char buffer[MAX_FD][BUFFER_SIZE], int fd, int bytes_read)
 {
-	t_fd_list	*tmp;
+	int	i;
 
-	if (*lst)
+	i = 0;
+	while (buffer[fd][i] != '\n' && i < BUFFER_SIZE && i < bytes_read)
 	{
-		tmp = *lst;
-		while (tmp->next)
-			tmp = tmp->next;
-		tmp->next = new;
+		// if (!buffer[fd][i])
+		// 	printf("EOF\n");
+		i++;
 	}
-	else
-		*lst = new;
+	if (buffer[fd][i] == '\n')
+		i++;
+	return (i);
 }
 
-t_fd_list	*ft_lstnew(int fd)
+char	*create_new_line(char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
 {
-	t_fd_list	*list;
+	char	*nl;
+	int		j;
 
-	list = malloc(sizeof(t_fd_list));
-	if (!list)
+	if (i == 0)
 		return (NULL);
-	list->remaining = NULL;
-	list->fd = fd;
-	list->next = NULL;
-	return (list);
+	j = 0;
+	nl = malloc(sizeof(char) * (i + 1));
+	if (!nl)
+		return (NULL);
+	while (j < i)
+	{
+		nl[j] = buffer[fd][j];
+		j++;
+	}
+	nl[j] = '\0';
+	return (nl);
 }
 
-int	init_warehouse(t_warehouse **wh, int fd)
+char	*join_new_line(char *nl,
+	char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
 {
-	if (*wh)
-		return (1);
-	*wh = malloc(sizeof(t_warehouse));
-	if (!*wh)
+	char	*tmp;
+	int		len;
+	int		j;
+
+	j = 0;
+	len = ft_strlen(nl);
+	tmp = malloc(sizeof(char) * (i + len + 1));
+	while (j < len)
+	{
+		tmp[j] = nl[j];
+		j++;
+	}
+	j = 0;
+	while (j < i)
+	{
+		tmp[len + j] = buffer[fd][j];
+		j++;
+	}
+	tmp[len + j] = '\0';
+	free(nl);
+	nl = tmp;
+	return (nl);
+}
+
+int	check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
+{
+	int	j;
+	size_t	len;
+
+	j = 0;
+	if (!nl)
 		return (0);
-	(*wh)->fd_list = ft_lstnew(fd);
-	(*wh)->nl = NULL;
-	(*wh)->i = 0;
-	(*wh)->current = NULL;
-	return (1);
-}
-
-t_fd_list	*search_fd(t_warehouse *wh, int fd)
-{
-	t_fd_list	*tmp;
-	
-	// printf("fd: %d\n", fd);
-	if (init_warehouse(&wh, fd) == 0)
-		return (NULL);
-	tmp = wh->fd_list;
-	while (tmp)
+	len = ft_strlen(nl);
+	if (len == 0)
+		return (0);
+	if (nl[len - 1] == '\n')
 	{
-		if (tmp->fd == fd)
-			return (tmp);
-		tmp = tmp->next;
+		j = 0;
+		while (i < BUFFER_SIZE)
+		{
+			buffer[fd][j] = buffer[fd][i];
+			i++;
+			j++;
+		}
+		buffer[fd][j] = '\0';
+		return (1);
 	}
-	tmp = ft_lstnew(fd);
-	if (!tmp)
-		return (NULL);
-	ft_lstadd_back(&wh->fd_list, tmp);
-	return (tmp);
+	return (0);
 }
