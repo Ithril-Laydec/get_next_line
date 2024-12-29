@@ -6,12 +6,11 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:34 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/29 17:54:00 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/29 20:13:57 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
 
 char	*get_next_line(int fd)
 {
@@ -33,7 +32,7 @@ char	*get_next_line(int fd)
 		if (check_nl(nl, buffer, fd, i))
 			return (nl);
 	}
-	while((bytes_read = read(fd, buffer[fd], BUFFER_SIZE)) > 0)
+	while ((bytes_read = read(fd, buffer[fd], BUFFER_SIZE)) > 0)
 	{
 		// printf("bytes_read: %d\n", bytes_read);
 		i = forward_i(buffer,fd, bytes_read);
@@ -41,10 +40,15 @@ char	*get_next_line(int fd)
 			nl = create_new_line(buffer, fd, i);
 		else
 			nl = join_new_line(nl, buffer, fd, i);
+		// printf("nl: %s\n", nl);
 		if (!nl)
 			return (NULL);
 		if(check_nl(nl, buffer, fd, i) || bytes_read < BUFFER_SIZE)
 			return (nl);
 	}
-	return (NULL);
+	// printf("nl: %s\n", nl);
+	// printf("bytes_read: %d\n", bytes_read);
+	if (bytes_read <= 0 && !nl)
+		return (NULL);
+	return (nl);
 }

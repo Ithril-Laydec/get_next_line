@@ -6,7 +6,7 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:44 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/29 17:54:45 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/29 20:13:48 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,25 +24,12 @@
 #  define MAX_FD 19999
 # endif
 
-typedef struct	s_fd_list
-{
-	char				*remaining;
-	struct s_fd_list	*next;
-	int					fd;
-}				t_fd_list;
-
-typedef struct	s_warehouse
-{
-	int				i;
-	char			*nl;
-}				t_warehouse;
-
 char	*get_next_line(int fd);
 size_t	ft_strlen(const char *str);
 int		forward_i(char buffer[MAX_FD][BUFFER_SIZE], int fd, int bytes_read);
 char	*create_new_line(char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
-char	*join_new_line(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
+char	*join_new_line(char *nl,
+			char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
 int		check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i);
 
-
-# endif
+#endif

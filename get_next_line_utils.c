@@ -6,7 +6,7 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:19 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/29 17:54:08 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/29 20:13:45 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,7 @@ int	forward_i(char buffer[MAX_FD][BUFFER_SIZE], int fd, int bytes_read)
 
 	i = 0;
 	while (buffer[fd][i] != '\n' && i < BUFFER_SIZE && i < bytes_read)
-	{
-		// if (!buffer[fd][i])
-		// 	printf("EOF\n");
 		i++;
-	}
 	if (buffer[fd][i] == '\n')
 		i++;
 	return (i);
@@ -90,7 +86,7 @@ char	*join_new_line(char *nl,
 
 int	check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
 {
-	int	j;
+	int		j;
 	size_t	len;
 
 	j = 0;
