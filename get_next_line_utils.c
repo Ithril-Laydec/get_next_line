@@ -6,7 +6,7 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:19 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/29 20:13:45 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/30 17:23:33 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,41 +24,61 @@ size_t	ft_strlen(const char *str)
 	}
 	return (len);
 }
-
-int	forward_i(char buffer[MAX_FD][BUFFER_SIZE], int fd, int bytes_read)
+char	*ft_strchr(const char *s, int c)
+{
+	while (*s && *s != (char)c)
+		s++;
+	if (*s || (char)c == 0)
+		return ((char *)s);
+	return (NULL);
+}
+int	forward_i(char buffer[MAX_FD][BUFFER_SIZE + 1], int fd, int bytes_read)
 {
 	int	i;
 
 	i = 0;
-	while (buffer[fd][i] != '\n' && i < BUFFER_SIZE && i < bytes_read)
+	while ((buffer[fd][i] != '\n' || buffer[fd][i] == '\0')
+			&& i < BUFFER_SIZE + 1 && i < bytes_read)
 		i++;
-	if (buffer[fd][i] == '\n')
-		i++;
+	// if (buffer[fd][i] == '\n')
+	// 	i++;
 	return (i);
 }
 
-char	*create_new_line(char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
+char	*create_new_line(char buffer[MAX_FD][BUFFER_SIZE + 1], int fd, int i)
 {
 	char	*nl;
 	int		j;
 
-	if (i == 0)
-		return (NULL);
+	// if (i == 0)
+	// 	return (NULL);
 	j = 0;
 	nl = malloc(sizeof(char) * (i + 1));
 	if (!nl)
 		return (NULL);
-	while (j < i)
+	while (j < i + 1)
 	{
 		nl[j] = buffer[fd][j];
 		j++;
 	}
 	nl[j] = '\0';
+	// printf("nl: %s|", nl);
+	if (nl[ft_strlen(nl) - 1] == '\n')
+	{
+		j = 0;
+		while (i < BUFFER_SIZE + 1)
+		{
+			buffer[fd][j] = buffer[fd][i];
+			i++;
+			j++;
+		}
+		buffer[fd][j] = '\0';
+	}
 	return (nl);
 }
 
 char	*join_new_line(char *nl,
-	char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
+	char buffer[MAX_FD][BUFFER_SIZE + 1], int fd, int i)
 {
 	char	*tmp;
 	int		len;
@@ -67,6 +87,11 @@ char	*join_new_line(char *nl,
 	j = 0;
 	len = ft_strlen(nl);
 	tmp = malloc(sizeof(char) * (i + len + 1));
+	if (!tmp)
+	{
+		free(nl);
+		return (NULL);
+	}
 	while (j < len)
 	{
 		tmp[j] = nl[j];
@@ -84,7 +109,7 @@ char	*join_new_line(char *nl,
 	return (nl);
 }
 
-int	check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
+int	check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE + 1], int fd, int i)
 {
 	int		j;
 	size_t	len;
@@ -98,7 +123,7 @@ int	check_nl(char *nl, char buffer[MAX_FD][BUFFER_SIZE], int fd, int i)
 	if (nl[len - 1] == '\n')
 	{
 		j = 0;
-		while (i < BUFFER_SIZE)
+		while (i < BUFFER_SIZE + 1)
 		{
 			buffer[fd][j] = buffer[fd][i];
 			i++;
