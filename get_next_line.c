@@ -6,131 +6,95 @@
 /*   By: itjimene <itjimene@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/27 11:20:34 by itjimene          #+#    #+#             */
-/*   Updated: 2024/12/30 17:29:54 by itjimene         ###   ########.fr       */
+/*   Updated: 2024/12/31 12:40:27 by itjimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*dol(char *s)
-{
-	int i = 0;
-	char *nl;
-	nl = malloc(sizeof(char) * (ft_strlen(s) + 1));
-	while (s[i])
-	{
-		if (s[i] == '\n')
-			nl[i] = '$';
-		i++;
-	}
-	nl[i] = '\0';
-	return (nl);
-}
-void	*ft_bzero(void *str, size_t n)
-{
-	size_t	i;
-	char	*ptr;
-
-	ptr = (char *)str;
-	i = 0;
-	while (i < n)
-	{
-		ptr[i] = 0;
-		i++;
-	}
-	return (str);
-}
-
-char	*search_in_buffer(char buffer[MAX_FD][BUFFER_SIZE + 1], int fd)
+char	*update_buffer(char *buffer)
 {
 	int		i;
-	char	*nl;
-	int		len;
-
-	i = ft_strchr(buffer[fd], '\n') - buffer[fd];
-	nl = create_new_line(buffer, fd, i);
-	if (nl)
-	{
-		printf("(buffer[fd]: %s)\n", dol(buffer[fd]));
-		len = ft_strlen(nl);
-		i = 0;
-		while (i < BUFFER_SIZE + 1 - len)
-		{
-			buffer[fd][i] = buffer[fd][i + len];
-			i++;
-		}
-		buffer[fd][len] = '\0';
-		return (nl);
-	}
-	return (NULL);
-}
-
-int	there_is_nl(char *nl)
-{
-	int	i;
+	int		j;
+	char	*new_buff;
 
 	i = 0;
-	while (nl[i])
-	{
-		if (nl[i] == '\n')
-			return (1);
+	while (buffer[i] && buffer[i] != '\n')
 		i++;
+	if (!buffer[i])
+	{
+		free(buffer);
+		return (NULL);
 	}
-	return (0);
+	new_buff = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
+	i++;
+	j = 0;
+	while (buffer[i])
+		new_buff[j++] = buffer[i++];
+	free(buffer);
+	return (new_buff);
 }
 
-char	*search_in_file(char buffer[MAX_FD][BUFFER_SIZE + 1], int fd)
+char	*get_new_line(char *buffer)
 {
+	char	*line;
+	int		i;
+
+	i = 0;
+	if (!buffer[i])
+		return (NULL);
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	line = ft_calloc(i + 2, sizeof(char));
+	i = 0;
+	while (buffer[i] && buffer[i] != '\n')
+	{
+		line[i] = buffer[i];
+		i++;
+	}
+	if (buffer[i] == '\n')
+		line[i] = '\n';
+	return (line);
+}
+
+char	*read_from_file(int fd, char *res)
+{
+	char	*buffer;
 	int		bytes_read;
-	int		i;
-	char	*nl;
 
-	// printf("(search_in_file)\n");
-	bytes_read = 0;
-	if (ft_strlen(buffer[fd]) > 0)
-		nl = search_in_buffer(buffer, fd);
-	else
-		nl = NULL;
-	while ((bytes_read = read(fd, buffer[fd], BUFFER_SIZE)) > 0)
+	if (!res)
+		res = ft_calloc(1, 1);
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	bytes_read = 1;
+	while (bytes_read > 0)
 	{
-	// printf("bytes_read: %d\n", bytes_read);
-		buffer[fd][bytes_read] = '\0';
-		// i = forward_i(buffer, fd, bytes_read);
-		// printf("i: %d\n", i);
-		i = ft_strchr(buffer[fd], '\n') - buffer[fd];
-		printf("i: %d\n", i);
-		if (!nl)
-			nl = create_new_line(buffer, fd, i);
-		else
-			nl = join_new_line(nl, buffer, fd, i);
-		if (!nl)
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+		{
+			free(buffer);
+			free(res);
 			return (NULL);
-		if (there_is_nl(nl))
+		}
+		buffer[bytes_read] = 0;
+		res = ft_strjoin(res, buffer);
+		if (ft_strchr(buffer, '\n'))
 			break ;
 	}
-	if (bytes_read == 0)
-	{
-		ft_bzero(buffer[fd], BUFFER_SIZE + 1);
-		return (nl);
-	}
-	if (check_nl(nl, buffer, fd, i))
-		return (nl);
-	return (NULL);
+	free(buffer);
+	return (res);
 }
 
 char	*get_next_line(int fd)
 {
-	static char	buffer[MAX_FD][BUFFER_SIZE + 1];
+	static char	*buffer[1999];
 	char		*nl;
 
-	if (fd < 0 || fd > MAX_FD || BUFFER_SIZE + 1 <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	nl = NULL;
-	if (ft_strlen(buffer[fd]) > 0)
-		nl = search_in_buffer(buffer, fd);
-	else
-		nl = search_in_file(buffer, fd);
-	if (!nl)
+	buffer[fd] = read_from_file(fd, buffer[fd]);
+	if (!buffer[fd])
 		return (NULL);
+	nl = get_new_line(buffer[fd]);
+	buffer[fd] = update_buffer(buffer[fd]);
 	return (nl);
 }
